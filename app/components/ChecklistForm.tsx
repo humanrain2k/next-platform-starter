@@ -93,11 +93,13 @@ const ChecklistForm = () => {
     checkCompletion();
   }, [formData]);
 
-  const generatePDF = async () => {
-    if (!date || !shift) {
-      alert('Please select date and shift before generating the report');
-      return;
-    }
+  const doc = await generatePDF();
+  if (doc) {
+    const pdfBase64 = await new Promise(resolve => {
+      doc.output('datauristring', (data) => {
+        resolve(data.split(',')[1]);
+      });
+    });
 
     const doc = new jsPDF();
     
