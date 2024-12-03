@@ -266,9 +266,9 @@ const ChecklistForm = () => {
                 <option value="C">C Shift</option>
               </select>
             </div>
-            <button
-              onClick={loadPreviousData}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
+            <button 
+              onClick={handlePDFExport}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
             >
               <Edit className="w-4 h-4" />
               Load Previous
