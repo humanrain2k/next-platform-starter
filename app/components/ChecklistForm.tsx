@@ -100,47 +100,91 @@ const ChecklistForm = () => {
   const generatePDF = () => {
     const doc = new jsPDF();
     
-    doc.setFontSize(16);
-    doc.text('Electromechanical Checklist', 105, 20, { align: 'center' });
+    // Add logos
+    doc.addImage('initial-logo', 'PNG', 20, 15, 40, 15);
+    doc.addImage('riyadh-airports-logo', 'PNG', 150, 15, 40, 15);
+  
+    // Title
     doc.setFontSize(12);
-    doc.text('(Temp, Humidity, Noise & Lux)', 105, 30, { align: 'center' });
+    doc.text('Electromechanical Checklist', 105, 20, { align: 'center' });
+    doc.text('(Temp, Humidity, Noise & Lux)', 105, 25, { align: 'center' });
+  
+    // Date at top right
+    doc.text(date, 160, 35);
+  
+    // Primary Water Temperature section
+    doc.text('PRIMARY WATER TEMPERATURE', 20, 40);
+    doc.rect(20, 45, 170, 40);
     
-    doc.text(`Date: ${date}`, 20, 40);
-    doc.text(`Shift: ${shift}`, 120, 40);
+    // Headers
+    doc.text('(Plant Room - 1600)', 25, 50);
+    doc.text('C Shift (°C)', 80, 50);
+    doc.text('C Shift (°C)', 130, 50);
+    doc.text('REMARK', 160, 50);
+  
+    // Water temperatures
+    doc.text('CHILLED WATER SUPPLY TEMP.', 25, 60);
+    doc.text(formData.primaryWater.chilledWaterSupply.reading1, 80, 60);
+    doc.text(formData.primaryWater.chilledWaterSupply.reading2, 130, 60);
     
-    let y = 60;
+    doc.text('CHILLED WATER RETURN TEMP', 25, 70);
+    doc.text(formData.primaryWater.chilledWaterReturn.reading1, 80, 70);
+    doc.text(formData.primaryWater.chilledWaterReturn.reading2, 130, 70);
+  
+    // MCF readings
+    doc.text('MCF - 01(1600) Supply', 25, 80);
+    doc.text(formData.primaryWater.mcf01Supply.reading1, 80, 80);
+    doc.text('MCF - 04(1800) Supply', 100, 80);
+    doc.text(formData.primaryWater.mcf04Supply.reading1, 150, 80);
+  
+    // Main table
+    const startY = 90;
+    const rowHeight = 7;
     
-    // Primary Water Temperature Section
-    doc.text('PRIMARY WATER TEMPERATURE', 20, y);
-    y += 10;
-    doc.text(`Chilled Water Supply: ${formData.primaryWater.chilledWaterSupply.reading1} / ${formData.primaryWater.chilledWaterSupply.reading2}`, 20, y);
-    y += 10;
-    doc.text(`Chilled Water Return: ${formData.primaryWater.chilledWaterReturn.reading1} / ${formData.primaryWater.chilledWaterReturn.reading2}`, 20, y);
-    y += 10;
-    doc.text(`MCF-01: ${formData.primaryWater.mcf01Supply.reading1}  MCF-04: ${formData.primaryWater.mcf04Supply.reading1}`, 20, y);
+    // Table headers
+    const headers = ['SI No', 'LOCATION', 'Temp °C', 'RH (%)', 'Noise Rating (NR)', 'Lux', 'Temp °C', 'RH (%)', 'Noise Rating (NR)', 'Lux', 'REMARK'];
     
-    y += 20;
-    
-    // Readings Table
-    Object.entries(locationsByLevel).forEach(([level, locations]) => {
-      doc.text(level, 20, y);
-      y += 10;
-      
-      locations.forEach((location) => {
-        const reading = formData.readings.find(r => r.location === location);
-        if (reading) {
-          doc.text(`${location}:`, 30, y);
-          doc.text(`${reading.group1.temp}°C / ${reading.group1.rh}% / ${reading.group1.noise}dB / ${reading.group1.lux}lux`, 120, y);
-          y += 8;
-          doc.text(`${reading.group2.temp}°C / ${reading.group2.rh}% / ${reading.group2.noise}dB / ${reading.group2.lux}lux`, 120, y);
-          y += 10;
-        }
-      });
-      
-      y += 10;
+    // Draw table
+    doc.rect(20, startY, 170, rowHeight);
+    headers.forEach((header, i) => {
+      doc.text(header, 25 + (i * 15), startY + 5);
     });
+  
+    let y = startY + rowHeight;
     
+    // Data rows with level grouping
+    Object.entries(locationsByLevel).forEach(([level, locations]) => {
+      // Level header
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, y, 170, rowHeight, 'F');
+      doc.text(level, 25, y + 5);
+      y += rowHeight;
+  
+      locations.forEach((location, index) => {
+        const reading = formData.readings[flatLocations.indexOf(location)];
+        
+        doc.rect(20, y, 170, rowHeight);
+        doc.text((index + 1).toString(), 25, y + 5);
+        doc.text(location, 40, y + 5);
+        doc.text(reading.group1.temp, 70, y + 5);
+        doc.text(reading.group1.rh, 85, y + 5);
+        doc.text(reading.group1.noise, 100, y + 5);
+        doc.text(reading.group1.lux, 115, y + 5);
+        doc.text(reading.group2.temp, 130, y + 5);
+        doc.text(reading.group2.rh, 145, y + 5);
+        doc.text(reading.group2.noise, 160, y + 5);
+        doc.text(reading.group2.lux, 175, y + 5);
+        
+        y += rowHeight;
+      });
+    });
+  
+    // Signature line at bottom
+    doc.line(20, y + 10, 190, y + 10);
+    doc.text('Technician Name', 20, y + 20);
+  
     return doc;
+
   };
 
   const handleEmailSend = async () => {
