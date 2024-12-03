@@ -88,22 +88,17 @@ const ChecklistForm = () => {
   // PART 4.2: COMPLETION CHECK EFFECT
   useEffect(() => {
     const checkCompletion = () => {
-      const primaryComplete = 
-        formData.primaryWater.chilledWaterSupply.reading1 !== '' &&
-        formData.primaryWater.chilledWaterSupply.reading2 !== '' &&
-        formData.primaryWater.chilledWaterReturn.reading1 !== '' &&
-        formData.primaryWater.chilledWaterReturn.reading2 !== '' &&
-        formData.primaryWater.mcf01Supply.reading1 !== '' &&
-        formData.primaryWater.mcf04Supply.reading1 !== '';
-
-      const readingsComplete = formData.readings.every(reading =>
-        Object.values(reading.group1).every(value => value !== '') &&
-        Object.values(reading.group2).every(value => value !== '')
+      // Check if at least one reading is filled
+      const hasAnyReading = formData.readings.some(reading => 
+        reading.group1.temp !== '' || 
+        reading.group1.rh !== '' || 
+        reading.group1.noise !== '' || 
+        reading.group1.lux !== ''
       );
-
-      setIsComplete(primaryComplete && readingsComplete);
+  
+      setIsComplete(hasAnyReading);
     };
-
+  
     checkCompletion();
   }, [formData]);
 
@@ -248,51 +243,122 @@ const ChecklistForm = () => {
           <CardTitle>PRIMARY WATER TEMPERATURE</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
-            <div className="grid grid-cols-3 gap-4 border-b pb-4">
-              <div className="font-medium">Plant Room - 1600</div>
-              <div className="font-medium text-center">C Shift (°C)</div>
-              <div className="font-medium text-center">C Shift (°C)</div>
-            </div>
+<div className="grid gap-4">
+  <div className="grid grid-cols-3 gap-4 border-b pb-4">
+    <div className="font-medium">Plant Room - 1600</div>
+    <div className="font-medium text-center">C Shift (°C)</div>
+    <div className="font-medium text-center">C Shift (°C)</div>
+  </div>
             
-            <div className="grid grid-cols-4 gap-4">
-              <div>CHILLED WATER SUPPLY TEMP.</div>
-              <input
-                type="number"
-                step="0.01"
-                className="p-2 border rounded"
-                value={formData.primaryWater.chilledWaterSupply.reading1}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  primaryWater: {
-                    ...prev.primaryWater,
-                    chilledWaterSupply: {
-                      ...prev.primaryWater.chilledWaterSupply,
-                      reading1: e.target.value
-                    }
-                  }
-                }))}
-              />
-              <input
-                type="number"
-                step="0.01"
-                className="p-2 border rounded"
-                value={formData.primaryWater.chilledWaterSupply.reading2}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  primaryWater: {
-                    ...prev.primaryWater,
-                    chilledWaterSupply: {
-                      ...prev.primaryWater.chilledWaterSupply,
-                      reading2: e.target.value
-                    }
-                  }
-                }))}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+  <div className="grid grid-cols-4 gap-4">
+    <div>CHILLED WATER SUPPLY TEMP.</div>
+    <input
+      type="number"
+      step="0.01"
+      className="p-2 border rounded"
+      value={formData.primaryWater.chilledWaterSupply.reading1}
+      onChange={(e) => setFormData(prev => ({
+        ...prev,
+        primaryWater: {
+          ...prev.primaryWater,
+          chilledWaterSupply: {
+            ...prev.primaryWater.chilledWaterSupply,
+            reading1: e.target.value
+          }
+        }
+      }))}
+    />
+    <input
+      type="number"
+      step="0.01"
+      className="p-2 border rounded"
+      value={formData.primaryWater.chilledWaterSupply.reading2}
+      onChange={(e) => setFormData(prev => ({
+        ...prev,
+        primaryWater: {
+          ...prev.primaryWater,
+          chilledWaterSupply: {
+            ...prev.primaryWater.chilledWaterSupply,
+            reading2: e.target.value
+          }
+        }
+      }))}
+    />
+  </div>
+
+  <div className="grid grid-cols-4 gap-4">
+    <div>CHILLED WATER RETURN TEMP</div>
+    <input
+      type="number"
+      step="0.01"
+      className="p-2 border rounded"
+      value={formData.primaryWater.chilledWaterReturn.reading1}
+      onChange={(e) => setFormData(prev => ({
+        ...prev,
+        primaryWater: {
+          ...prev.primaryWater,
+          chilledWaterReturn: {
+            ...prev.primaryWater.chilledWaterReturn,
+            reading1: e.target.value
+          }
+        }
+      }))}
+    />
+    <input
+      type="number"
+      step="0.01"
+      className="p-2 border rounded"
+      value={formData.primaryWater.chilledWaterReturn.reading2}
+      onChange={(e) => setFormData(prev => ({
+        ...prev,
+        primaryWater: {
+          ...prev.primaryWater,
+          chilledWaterReturn: {
+            ...prev.primaryWater.chilledWaterReturn,
+            reading2: e.target.value
+          }
+        }
+      }))}
+    />
+  </div>
+
+  <div className="grid grid-cols-4 gap-4">
+    <div>MCF - 01(1600) Supply Temperature</div>
+    <input
+      type="number"
+      step="0.01"
+      className="p-2 border rounded"
+      value={formData.primaryWater.mcf01Supply.reading1}
+      onChange={(e) => setFormData(prev => ({
+        ...prev,
+        primaryWater: {
+          ...prev.primaryWater,
+          mcf01Supply: {
+            ...prev.primaryWater.mcf01Supply,
+            reading1: e.target.value
+          }
+        }
+      }))}
+    />
+    <div className="font-medium">MCF - 04(1800) Supply Temperature</div>
+    <input
+      type="number"
+      step="0.01"
+      className="p-2 border rounded"
+      value={formData.primaryWater.mcf04Supply.reading1}
+      onChange={(e) => setFormData(prev => ({
+        ...prev,
+        primaryWater: {
+          ...prev.primaryWater,
+          mcf04Supply: {
+            ...prev.primaryWater.mcf04Supply,
+            reading1: e.target.value
+          }
+        }
+      }))}
+    />
+  </div>
+</div>
 
       {/* Readings Table */}
       <Card className="mb-6">
