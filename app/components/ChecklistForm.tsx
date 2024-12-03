@@ -1,4 +1,3 @@
-// PART 1: IMPORTS
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,7 +6,6 @@ import { Camera, Mail, Save, Edit } from 'lucide-react';
 import jsPDF from 'jspdf';
 import emailjs from '@emailjs/browser';
 
-// PART 2: INTERFACES
 interface Reading {
   temp: string;
   rh: string;
@@ -22,7 +20,6 @@ interface LocationReading {
   remark: string;
 }
 
-// PART 3: LOCATIONS DATA
 const locationsByLevel: { [key: string]: string[] } = {
   'LOWER LEVEL': [
     "Lower level entrance X-Ray Area",
@@ -63,13 +60,12 @@ const allLocations = Object.entries(locationsByLevel).map(([level, locations]) =
 
 const flatLocations = Object.values(locationsByLevel).flat();
 
-// PART 4: MAIN COMPONENT
 const ChecklistForm = () => {
-  // PART 4.1: STATE DEFINITIONS
   const [emailAddress, setEmailAddress] = useState('');
   const [shift, setShift] = useState('');
   const [date, setDate] = useState('');
   const [isComplete, setIsComplete] = useState(false);
+
   const [formData, setFormData] = useState({
     primaryWater: {
       chilledWaterSupply: { reading1: '', reading2: '' },
@@ -85,7 +81,6 @@ const ChecklistForm = () => {
     }))
   });
 
-  // PART 4.2: COMPLETION CHECK EFFECT
   useEffect(() => {
     const checkCompletion = () => {
       // Check if at least one reading is filled
@@ -95,47 +90,59 @@ const ChecklistForm = () => {
         reading.group1.noise !== '' || 
         reading.group1.lux !== ''
       );
-  
+
       setIsComplete(hasAnyReading);
     };
-  
+
     checkCompletion();
   }, [formData]);
 
-  // PART 4.3: PDF GENERATION
   const generatePDF = () => {
     const doc = new jsPDF();
     
-    // Add title
     doc.setFontSize(16);
     doc.text('Electromechanical Checklist', 105, 20, { align: 'center' });
     doc.setFontSize(12);
     doc.text('(Temp, Humidity, Noise & Lux)', 105, 30, { align: 'center' });
     
-    // Add date and shift
     doc.text(`Date: ${date}`, 20, 40);
     doc.text(`Shift: ${shift}`, 120, 40);
     
-    // Add primary water temperature section
-    doc.text('PRIMARY WATER TEMPERATURE', 20, 50);
+    let y = 60;
     
-    // Add readings table
-    let y = 70;
-    doc.text('SI No', 20, y);
-    doc.text('Location', 40, y);
-    doc.text('Temp °C', 80, y);
+    // Primary Water Temperature Section
+    doc.text('PRIMARY WATER TEMPERATURE', 20, y);
+    y += 10;
+    doc.text(`Chilled Water Supply: ${formData.primaryWater.chilledWaterSupply.reading1} / ${formData.primaryWater.chilledWaterSupply.reading2}`, 20, y);
+    y += 10;
+    doc.text(`Chilled Water Return: ${formData.primaryWater.chilledWaterReturn.reading1} / ${formData.primaryWater.chilledWaterReturn.reading2}`, 20, y);
+    y += 10;
+    doc.text(`MCF-01: ${formData.primaryWater.mcf01Supply.reading1}  MCF-04: ${formData.primaryWater.mcf04Supply.reading1}`, 20, y);
     
-    formData.readings.forEach((reading, index) => {
+    y += 20;
+    
+    // Readings Table
+    Object.entries(locationsByLevel).forEach(([level, locations]) => {
+      doc.text(level, 20, y);
       y += 10;
-      doc.text((index + 1).toString(), 20, y);
-      doc.text(reading.location, 40, y);
-      doc.text(reading.group1.temp.toString(), 80, y);
+      
+      locations.forEach((location) => {
+        const reading = formData.readings.find(r => r.location === location);
+        if (reading) {
+          doc.text(`${location}:`, 30, y);
+          doc.text(`${reading.group1.temp}°C / ${reading.group1.rh}% / ${reading.group1.noise}dB / ${reading.group1.lux}lux`, 120, y);
+          y += 8;
+          doc.text(`${reading.group2.temp}°C / ${reading.group2.rh}% / ${reading.group2.noise}dB / ${reading.group2.lux}lux`, 120, y);
+          y += 10;
+        }
+      });
+      
+      y += 10;
     });
     
     return doc;
   };
 
-  // PART 4.4: EMAIL HANDLING
   const handleEmailSend = async () => {
     if (!emailAddress) {
       alert('Please enter an email address');
@@ -165,7 +172,6 @@ const ChecklistForm = () => {
     }
   };
 
-  // PART 4.5: DATA SAVING
   const handleSave = () => {
     if (!date || !shift) {
       alert('Please select date and shift before saving');
@@ -175,7 +181,6 @@ const ChecklistForm = () => {
     alert('Progress saved successfully');
   };
 
-  // PART 4.6: LOAD PREVIOUS DATA
   const loadPreviousData = () => {
     if (!date || !shift) {
       alert('Please select date and shift to load data');
@@ -190,10 +195,8 @@ const ChecklistForm = () => {
     }
   };
 
-  // PART 4.7: COMPONENT RENDER
   return (
     <div className="max-w-[1200px] mx-auto p-4">
-      {/* Header Controls */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-4">
@@ -237,130 +240,124 @@ const ChecklistForm = () => {
         </CardHeader>
       </Card>
 
-      {/* Primary Water Temperature Section */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>PRIMARY WATER TEMPERATURE</CardTitle>
         </CardHeader>
         <CardContent>
-<div className="grid gap-4">
-  <div className="grid grid-cols-3 gap-4 border-b pb-4">
-    <div className="font-medium">Plant Room - 1600</div>
-    <div className="font-medium text-center">C Shift (°C)</div>
-    <div className="font-medium text-center">C Shift (°C)</div>
-  </div>
-            
-  <div className="grid grid-cols-4 gap-4">
-    <div>CHILLED WATER SUPPLY TEMP.</div>
-    <input
-      type="number"
-      step="0.01"
-      className="p-2 border rounded"
-      value={formData.primaryWater.chilledWaterSupply.reading1}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        primaryWater: {
-          ...prev.primaryWater,
-          chilledWaterSupply: {
-            ...prev.primaryWater.chilledWaterSupply,
-            reading1: e.target.value
-          }
-        }
-      }))}
-    />
-    <input
-      type="number"
-      step="0.01"
-      className="p-2 border rounded"
-      value={formData.primaryWater.chilledWaterSupply.reading2}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        primaryWater: {
-          ...prev.primaryWater,
-          chilledWaterSupply: {
-            ...prev.primaryWater.chilledWaterSupply,
-            reading2: e.target.value
-          }
-        }
-      }))}
-    />
-  </div>
+          <div className="grid gap-4">
+            <div className="grid grid-cols-4 gap-4">
+              <div>CHILLED WATER SUPPLY TEMP.</div>
+              <input
+                type="number"
+                step="0.01"
+                className="p-2 border rounded"
+                value={formData.primaryWater.chilledWaterSupply.reading1}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  primaryWater: {
+                    ...prev.primaryWater,
+                    chilledWaterSupply: {
+                      ...prev.primaryWater.chilledWaterSupply,
+                      reading1: e.target.value
+                    }
+                  }
+                }))}
+              />
+              <input
+                type="number"
+                step="0.01"
+                className="p-2 border rounded"
+                value={formData.primaryWater.chilledWaterSupply.reading2}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  primaryWater: {
+                    ...prev.primaryWater,
+                    chilledWaterSupply: {
+                      ...prev.primaryWater.chilledWaterSupply,
+                      reading2: e.target.value
+                    }
+                  }
+                }))}
+              />
+            </div>
 
-  <div className="grid grid-cols-4 gap-4">
-    <div>CHILLED WATER RETURN TEMP</div>
-    <input
-      type="number"
-      step="0.01"
-      className="p-2 border rounded"
-      value={formData.primaryWater.chilledWaterReturn.reading1}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        primaryWater: {
-          ...prev.primaryWater,
-          chilledWaterReturn: {
-            ...prev.primaryWater.chilledWaterReturn,
-            reading1: e.target.value
-          }
-        }
-      }))}
-    />
-    <input
-      type="number"
-      step="0.01"
-      className="p-2 border rounded"
-      value={formData.primaryWater.chilledWaterReturn.reading2}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        primaryWater: {
-          ...prev.primaryWater,
-          chilledWaterReturn: {
-            ...prev.primaryWater.chilledWaterReturn,
-            reading2: e.target.value
-          }
-        }
-      }))}
-    />
-  </div>
+            <div className="grid grid-cols-4 gap-4">
+              <div>CHILLED WATER RETURN TEMP</div>
+              <input
+                type="number"
+                step="0.01"
+                className="p-2 border rounded"
+                value={formData.primaryWater.chilledWaterReturn.reading1}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  primaryWater: {
+                    ...prev.primaryWater,
+                    chilledWaterReturn: {
+                      ...prev.primaryWater.chilledWaterReturn,
+                      reading1: e.target.value
+                    }
+                  }
+                }))}
+              />
+              <input
+                type="number"
+                step="0.01"
+                className="p-2 border rounded"
+                value={formData.primaryWater.chilledWaterReturn.reading2}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  primaryWater: {
+                    ...prev.primaryWater,
+                    chilledWaterReturn: {
+                      ...prev.primaryWater.chilledWaterReturn,
+                      reading2: e.target.value
+                    }
+                  }
+                }))}
+              />
+            </div>
 
-  <div className="grid grid-cols-4 gap-4">
-    <div>MCF - 01(1600) Supply Temperature</div>
-    <input
-      type="number"
-      step="0.01"
-      className="p-2 border rounded"
-      value={formData.primaryWater.mcf01Supply.reading1}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        primaryWater: {
-          ...prev.primaryWater,
-          mcf01Supply: {
-            ...prev.primaryWater.mcf01Supply,
-            reading1: e.target.value
-          }
-        }
-      }))}
-    />
-    <div className="font-medium">MCF - 04(1800) Supply Temperature</div>
-    <input
-      type="number"
-      step="0.01"
-      className="p-2 border rounded"
-      value={formData.primaryWater.mcf04Supply.reading1}
-      onChange={(e) => setFormData(prev => ({
-        ...prev,
-        primaryWater: {
-          ...prev.primaryWater,
-          mcf04Supply: {
-            ...prev.primaryWater.mcf04Supply,
-            reading1: e.target.value
-          }
-        }
-      }))}
-    />
-  </div>
-</div>
+            <div className="grid grid-cols-4 gap-4">
+              <div>MCF - 01(1600) Supply</div>
+              <input
+                type="number"
+                step="0.01"
+                className="p-2 border rounded"
+                value={formData.primaryWater.mcf01Supply.reading1}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  primaryWater: {
+                    ...prev.primaryWater,
+                    mcf01Supply: {
+                      ...prev.primaryWater.mcf01Supply,
+                      reading1: e.target.value
+                    }
+                  }
+                }))}
+              />
+              <div className="font-medium">MCF - 04(1800) Supply</div>
+              <input
+                type="number"
+                step="0.01"
+                className="p-2 border rounded"
+                value={formData.primaryWater.mcf04Supply.reading1}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  primaryWater: {
+                    ...prev.primaryWater,
+                    mcf04Supply: {
+                      ...prev.primaryWater.mcf04Supply,
+                      reading1: e.target.value
+                    }
+                  }
+                }))}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Readings Table */}
       <Card className="mb-6">
         <CardContent>
           <table className="w-full border-collapse">
@@ -392,25 +389,24 @@ const ChecklistForm = () => {
                   <tr className="bg-gray-100">
                     <td className="border p-2 font-bold" colSpan={11}>{level}</td>
                   </tr>
-                  {locations.map((location, locationIndex) => {
-                    const globalIndex = flatLocations.indexOf(location);
+                  {locations.map((location) => {
+                    const index = flatLocations.indexOf(location);
                     return (
                       <tr key={location}>
-                        <td className="border p-2 text-center">{globalIndex + 1}</td>
+                        <td className="border p-2 text-center">{index + 1}</td>
                         <td className="border p-2">{location}</td>
-                        {/* First Reading Group */}
                         <td className="border p-2">
                           <input
                             type="number"
                             step="0.1"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group1.temp}
+                            value={formData.readings[index].group1.temp}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group1: {
-                                  ...newReadings[globalIndex].group1,
+                                  ...newReadings[index].group1,
                                   temp: e.target.value
                                 }
                               };
@@ -423,13 +419,13 @@ const ChecklistForm = () => {
                             type="number"
                             step="0.1"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group1.rh}
+                            value={formData.readings[index].group1.rh}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group1: {
-                                  ...newReadings[globalIndex].group1,
+                                  ...newReadings[index].group1,
                                   rh: e.target.value
                                 }
                               };
@@ -442,13 +438,13 @@ const ChecklistForm = () => {
                             type="number"
                             step="0.1"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group1.noise}
+                            value={formData.readings[index].group1.noise}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group1: {
-                                  ...newReadings[globalIndex].group1,
+                                  ...newReadings[index].group1,
                                   noise: e.target.value
                                 }
                               };
@@ -460,13 +456,13 @@ const ChecklistForm = () => {
                           <input
                             type="number"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group1.lux}
+                            value={formData.readings[index].group1.lux}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group1: {
-                                  ...newReadings[globalIndex].group1,
+                                  ...newReadings[index].group1,
                                   lux: e.target.value
                                 }
                               };
@@ -474,19 +470,18 @@ const ChecklistForm = () => {
                             }}
                           />
                         </td>
-                        {/* Second Reading Group */}
                         <td className="border p-2">
                           <input
                             type="number"
                             step="0.1"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group2.temp}
+                            value={formData.readings[index].group2.temp}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group2: {
-                                  ...newReadings[globalIndex].group2,
+                                  ...newReadings[index].group2,
                                   temp: e.target.value
                                 }
                               };
@@ -499,13 +494,13 @@ const ChecklistForm = () => {
                             type="number"
                             step="0.1"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group2.rh}
+                            value={formData.readings[index].group2.rh}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group2: {
-                                  ...newReadings[globalIndex].group2,
+                                  ...newReadings[index].group2,
                                   rh: e.target.value
                                 }
                               };
@@ -518,13 +513,13 @@ const ChecklistForm = () => {
                             type="number"
                             step="0.1"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group2.noise}
+                            value={formData.readings[index].group2.noise}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group2: {
-                                  ...newReadings[globalIndex].group2,
+                                  ...newReadings[index].group2,
                                   noise: e.target.value
                                 }
                               };
@@ -536,13 +531,13 @@ const ChecklistForm = () => {
                           <input
                             type="number"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].group2.lux}
+                            value={formData.readings[index].group2.lux}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 group2: {
-                                  ...newReadings[globalIndex].group2,
+                                  ...newReadings[index].group2,
                                   lux: e.target.value
                                 }
                               };
@@ -554,11 +549,11 @@ const ChecklistForm = () => {
                           <input
                             type="text"
                             className="w-full p-1"
-                            value={formData.readings[globalIndex].remark}
+                            value={formData.readings[index].remark}
                             onChange={(e) => {
                               const newReadings = [...formData.readings];
-                              newReadings[globalIndex] = {
-                                ...newReadings[globalIndex],
+                              newReadings[index] = {
+                                ...newReadings[index],
                                 remark: e.target.value
                               };
                               setFormData(prev => ({...prev, readings: newReadings}));
@@ -575,7 +570,6 @@ const ChecklistForm = () => {
         </CardContent>
       </Card>
 
-      {/* Export Controls */}
       {isComplete && (
         <Card className="mt-6 print:hidden">
           <CardContent className="flex gap-4 justify-end p-4">
@@ -603,12 +597,6 @@ const ChecklistForm = () => {
           </CardContent>
         </Card>
       )}
-
-      {/* Signature Area */}
-      <div className="mt-8 print:mt-16">
-        <div className="h-20 border-b border-dashed"></div>
-        <div className="text-center mt-2">Signature</div>
-      </div>
     </div>
   );
 };
