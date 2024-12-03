@@ -9,7 +9,16 @@ module.exports = {
                 'grid-pattern': "linear-gradient(to bottom, theme('colors.neutral.950 / 0%'), theme('colors.neutral.950 / 100%')), url('/images/noise.png')"
             },
             colors: {
-                neutral: colors.neutral
+                neutral: colors.neutral,
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
+                card: {
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))"
+                },
             },
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans]
@@ -30,5 +39,10 @@ module.exports = {
             }
         ]
     },
-    plugins: [require('daisyui')]
+    plugins: [require('daisyui')],
+    variants: {
+        extend: {
+            display: ["print"]
+        },
+    }
 };
