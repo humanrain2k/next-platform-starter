@@ -219,8 +219,8 @@ const ChecklistForm = () => {
           <div className="grid gap-4">
             <div className="grid grid-cols-3 gap-4 border-b pb-4">
               <div className="font-medium">Plant Room - 1600</div>
-              <div className="font-medium text-center">C Shift (°C)</div>
-              <div className="font-medium text-center">C Shift (°C)</div>
+              <div className="font-medium text-center">Temp (°C)</div>
+              <div className="font-medium text-center">Temp (°C)</div>
             </div>
             
             <div className="grid grid-cols-4 gap-4">
