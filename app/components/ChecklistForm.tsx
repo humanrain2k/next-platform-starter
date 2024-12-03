@@ -1,5 +1,8 @@
 'use client';
 
+import jsPDF from 'jspdf';
+import emailjs from '@emailjs/browser';
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { Camera, Mail, Save, Edit } from 'lucide-react';
@@ -422,6 +425,66 @@ const ChecklistForm = () => {
       </Card>
 
       {/* Export Controls - Only shown when complete */}
+      const generatePDF = () => {
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.text('Electromechanical Checklist', 105, 20, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text('(Temp, Humidity, Noise & Lux)', 105, 30, { align: 'center' });
+      
+      // Add date and shift
+      doc.text(`Date: ${date}`, 20, 40);
+      doc.text(`Shift: ${shift}`, 120, 40);
+      
+      // Add primary water temperature section
+      doc.text('PRIMARY WATER TEMPERATURE', 20, 50);
+      
+      // Add readings table
+      let y = 70;
+      doc.text('SI No', 20, y);
+      doc.text('Location', 40, y);
+      doc.text('Temp °C', 80, y);
+      
+      formData.readings.forEach((reading, index) => {
+      y += 10;
+      doc.text((index + 1).toString(), 20, y);
+      doc.text(reading.location, 40, y);
+      doc.text(reading.group1.temp.toString(), 80, y);
+      });
+      
+      return doc;
+      };
+      
+      const handleEmailSend = async () => {
+      if (!emailAddress) {
+      alert('Please enter an email address');
+      return;
+      }
+      
+      const pdf = generatePDF();
+      const pdfBase64 = pdf.output('datauristring');
+      
+      try {
+      await emailjs.send(
+      'YOUR_SERVICE_ID', // You'll get this from EmailJS
+      'YOUR_TEMPLATE_ID', // You'll get this from EmailJS
+      {
+        to_email: emailAddress,
+        pdf_attachment: pdfBase64,
+        date: date,
+        shift: shift,
+      },
+      '2L53_Rnsj4aeJ2LJH'
+      );
+      
+      alert('Report sent successfully!');
+      } catch (error) {
+      console.error('Failed to send email:', error);
+      alert('Failed to send email. Please try again.');
+      }
+      };
       {isComplete && (
         <Card className="mt-6 print:hidden">
           <CardContent className="flex gap-4 justify-end p-4">
@@ -432,11 +495,17 @@ const ChecklistForm = () => {
               value={emailAddress}
               onChange={(e) => setEmailAddress(e.target.value)}
             />
-            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
+            <button 
+              onClick={handleEmailSend}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
+            >
               <Mail className="w-4 h-4" />
               Send Report
             </button>
-            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2">
+            <button 
+              onClick={() => generatePDF().save('checklist.pdf')}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+            >
               <Camera className="w-4 h-4" />
               Download PDF
             </button>
