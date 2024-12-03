@@ -61,12 +61,14 @@ const [formData, setFormData] = useState({
     mcf01Supply: { reading1: '' },
     mcf04Supply: { reading1: '' }
   },
-  readings: Object.values(locationsByLevel).flat().map(location => ({
-    location,
-    group1: { temp: '', rh: '', noise: '', lux: '' },
-    group2: { temp: '', rh: '', noise: '', lux: '' },
-    remark: ''
-  }))
+  readings: Object.values(locationsByLevel)
+    .flat()
+    .map(location => ({
+      location,
+      group1: { temp: '', rh: '', noise: '', lux: '' },
+      group2: { temp: '', rh: '', noise: '', lux: '' },
+      remark: ''
+    }))
 });
 
 const ChecklistForm = () => {
