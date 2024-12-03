@@ -20,6 +20,55 @@ interface LocationReading {
   remark: string;
 }
 
+const locationsByLevel: { [key: string]: string[] } = {
+  'LOWER LEVEL': [
+    "Lower level entrance X-Ray Area",
+    "East side VVIP sitting area",
+    "West side VVIP sitting area",
+    "Ladies Lounge",
+    "Cafeteria Area",
+    "Baggage Area",
+    "Toilet Area",
+    "Prayer Room",
+    "Near Protocol Office",
+    "Operation Office"
+  ],
+  'INTER LEVEL': [
+    "Maintenance Office",
+    "Corridor #1",
+    "Corridor #2",
+    "Data Room",
+    "Near Suite #1"
+  ],
+  'PLAZA LEVEL': [
+    "Near Suite #2",
+    "Suite #2 Electrical Room",
+    "Near Suite #3",
+    "Suite #3 Electrical Room",
+    "Conference Room",
+    "Plaza Area 300",
+    "Near East Jet Way",
+    "Near West Jet Way",
+    "Near Suite #4"
+  ]
+};
+
+// Fix the formData initialization to use Object.values(locationsByLevel).flat()
+const [formData, setFormData] = useState({
+  primaryWater: {
+    chilledWaterSupply: { reading1: '', reading2: '' },
+    chilledWaterReturn: { reading1: '', reading2: '' },
+    mcf01Supply: { reading1: '' },
+    mcf04Supply: { reading1: '' }
+  },
+  readings: Object.values(locationsByLevel).flat().map(location => ({
+    location,
+    group1: { temp: '', rh: '', noise: '', lux: '' },
+    group2: { temp: '', rh: '', noise: '', lux: '' },
+    remark: ''
+  }))
+});
+
 const ChecklistForm = () => {
   const [emailAddress, setEmailAddress] = useState('');
   const [shift, setShift] = useState('');
