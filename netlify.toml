@@ -1,3 +1,7 @@
 [build]
-  publish = ".next"
-  command = "npm run build"
+command = "npm run build"
+publish = ".next"
+
+[build.environment]
+NODE_VERSION = "18"
+NEXT_USE_NETLIFY_EDGE = "true"
