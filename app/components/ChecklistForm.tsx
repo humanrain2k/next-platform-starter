@@ -266,20 +266,13 @@ const ChecklistForm = () => {
                 <option value="C">C Shift</option>
               </select>
             </div>
-            <button 
-              onClick={handlePDFExport}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Load Previous
-            </button>
-            <button
-              onClick={handleSave}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              Save Progress
-            </button>
+          <button 
+            onClick={() => generatePDF().save('checklist.pdf')}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+          >
+            <Camera className="w-4 h-4" />
+            Download PDF
+          </button>
           </CardTitle>
         </CardHeader>
       </Card>
