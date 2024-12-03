@@ -17,7 +17,9 @@
         "clsx": "^2.0.0",
         "tailwind-merge": "^2.0.0",
         "@radix-ui/react-slot": "^1.0.2",
-        "daisyui": "^4.4.19"
+        "daisyui": "^4.4.19",
+        "jspdf": "^2.5.1",
+        "@emailjs/browser": "^4.1.0"
     },
     "devDependencies": {
         "typescript": "^5",
