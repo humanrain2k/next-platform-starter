@@ -132,8 +132,8 @@ const ChecklistForm = () => {
     
     try {
       await emailjs.send(
-        'YOUR_SERVICE_ID',
-        'YOUR_TEMPLATE_ID',
+        'service_1csfpd8',  // Replace YOUR_SERVICE_ID with this
+        'template_ISG-electromech',  // Replace YOUR_TEMPLATE_ID with this
         {
           to_email: emailAddress,
           pdf_attachment: pdfBase64,
